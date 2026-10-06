@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Elite Estates{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Poppins:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-dark: #b8962e;
+            --gold-light: #e8cb6a;
+            --black: #0a0a0a;
+            --dark: #111111;
+            --dark2: #1a1a1a;
+            --dark3: #222222;
+            --text: #e8e8e8;
+            --text-muted: #888;
+            --border: rgba(212, 175, 55, 0.25);
+            --success: #2ecc71;
+            --error: #e74c3c;
+            --warning: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(12px);
+            padding: 0 80px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 26px;
+            letter-spacing: 3px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo span {
+            font-size: 13px;
+            display: block;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 300;
+            margin-top: -4px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        nav a {
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 8px 16px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            border-radius: 2px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--gold);
+        }
+
+        .nav-btn {
+            background: var(--gold);
+            color: var(--black) !important;
+            padding: 8px 20px !important;
+            font-weight: 600 !important;
+            transition: background 0.3s !important;
+        }
+
+        .nav-btn:hover {
+            background: var(--gold-dark) !important;
+            color: var(--black) !important;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--gold);
+            font-size: 13px;
+        }
+
+        /* ── FLASH MESSAGES ── */
+        .flash-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .flash {
+            padding: 14px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            min-width: 280px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease;
+            border-left: 3px solid;
+        }
+
+        .flash.success {
+            background: rgba(46, 204, 113, 0.15);
+            border-color: var(--success);
+            color: #2ecc71;
+        }
+
+        .flash.error {
+            background: rgba(231, 76, 60, 0.15);
+            border-color: var(--error);
+            color: #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 11px;
+        }
+
+        .btn-danger {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-danger:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-success {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .btn-success:hover {
+            background: #2ecc71;
+            color: var(--black);
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--dark2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: var(--gold);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(212, 175, 55, 0.1);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background: var(--dark3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card-type {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .card-location {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .card-price {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 16px;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+
+        .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── FORMS ── */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--dark3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            border-radius: 2px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--gold);
+        }
+
+        .form-control option {
+            background: var(--dark3);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* ── SECTION ── */
+        .section {
+            padding: 80px;
+        }
+
+        .section-title {
+            margin-bottom: 50px;
+        }
+
+        .section-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .section-title .line {
+            width: 60px;
+            height: 2px;
+            background: var(--gold);
+            margin-top: 12px;
+        }
+
+        /* ── GRID ── */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 28px;
+        }
+
+        /* ── BADGE ── */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border-radius: 2px;
+            font-weight: 600;
+        }
+
+        .badge-sale {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            border: 1px solid var(--border);
+        }
+
+        .badge-rent {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .badge-auction {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .badge-pending {
+            background: rgba(243, 156, 18, 0.15);
+            color: #f39c12;
+            border: 1px solid rgba(243, 156, 18, 0.3);
+        }
+
+        .badge-approved {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .badge-rejected {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        /* ── TABLE ── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            font-weight: 500;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 13px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(212, 175, 55, 0.03);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--dark);
+            border-top: 1px solid var(--border);
+            padding: 24px 80px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        footer p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        footer .footer-brand {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 18px;
+        }
+
+        /* ── PAGE PADDING ── */
+        main {
+            padding-top: 72px;
+        }
+
+        @media (max-width: 1024px) {
+            header {
+                padding: 0 24px;
+            }
+
+            .section {
+                padding: 60px 24px;
+            }
+
+            .grid-3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .grid-3,
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+        nav a span {
+                display: none;
+            }
+        }
+
+        /* ── IMAGE VIEWER MODAL ── */
+        .image-viewer-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .image-viewer-modal.active {
+            display: flex;
+        }
+
+        .image-viewer-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border);
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .image-viewer-close:hover {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .clickable-img {
+            cursor: zoom-in;
+            transition: opacity 0.3s;
+        }
+
+        .clickable-img:hover {
+            opacity: 0.9;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+    <header>
+        <a href="/" class="logo">
+            ⬡ Prop-Easy
+            <span>Luxury Real Estate</span>
+        </a>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/properties">Properties</a>
+            <a href="/auctions">Auctions</a>
+            {% if session.user_id %}
+            {% if session.user_role == 'admin' %}
+            <a href="/admin">Dashboard</a>
+            {% else %}
+            <a href="/dashboard">My Account</a>
+            <a href="/add-property">+ List Property</a>
+            {% endif %}
+            <a href="/logout" class="nav-btn">Logout</a>
+            {% else %}
+            <a href="/login">Login</a>
+            <a href="/register" class="nav-btn">Register</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">
+            <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endwith %}
+    </div>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <span class="footer-brand">⬡ Prop-Easy</span>
+        <p>© 2026 Prop-Easy, makes your housing dream come true</p>
+        <p style="color:var(--gold); font-size:12px;">Luxury · Integrity · Excellence</p>
+    </footer>
+
+    <div class="image-viewer-modal" id="global-image-viewer" onclick="closeFullImage()">
+        <button class="image-viewer-close" onclick="closeFullImage()"><i class="fas fa-times"></i></button>
+        <img src="" alt="Full View" onclick="event.stopPropagation()">
+    </div>
+
+    <script>
+        // Auto-dismiss flash messages
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(100px)';
+                el.style.transition = 'all 0.4s';
+                setTimeout(() => el.remove(), 400);
+            });
+        }, 4000);
+
+        function openFullImage(src) {
+            const modal = document.getElementById('global-image-viewer');
+            const img = modal.querySelector('img');
+            img.src = src;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeFullImage() {
+            const modal = document.getElementById('global-image-viewer');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeFullImage();
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

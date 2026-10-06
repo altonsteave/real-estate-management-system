@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% block title %}Properties — Elite Estates{% endblock %}
+{% block extra_css %}
+<style>
+    .page-hero {
+        padding: 80px 80px 40px;
+        background: linear-gradient(180deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .page-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 48px;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .page-hero p {
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+
+    .filters {
+        padding: 28px 80px;
+        background: var(--dark);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .filters form {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    .filters .form-control {
+        width: auto;
+        min-width: 160px;
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .filters input[type=text] {
+        flex: 1;
+        min-width: 240px;
+    }
+
+    .filter-type {
+        display: flex;
+        gap: 8px;
+    }
+
+    .type-btn {
+        padding: 10px 20px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 12px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-family: 'Poppins', sans-serif;
+        border-radius: 2px;
+        text-decoration: none;
+    }
+
+    .type-btn:hover,
+    .type-btn.active {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.08);
+    }
+
+    .props-section {
+        padding: 60px 80px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px;
+        color: var(--text-muted);
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: var(--gold);
+        opacity: 0.3;
+        margin-bottom: 16px;
+    }
+
+    .results-count {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-bottom: 32px;
+    }
+
+    .results-count span {
+        color: var(--gold);
+        font-weight: 600;
+    }
+
+    .locality-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border);
+        color: var(--gold);
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 2px;
+        font-weight: 600;
+    }
+
+    .locality-badge i {
+        font-size: 10px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <h1>Properties</h1>
+    <p>Browse our curated collection of luxury real estate</p>
+</div>
+
+<div class="filters">
+    <form method="GET">
+        <input type="text" name="search" class="form-control" placeholder="Search by title or location..."
+            value="{{ search }}">
+        <div class="filter-type">
+            <a href="/properties" class="type-btn {% if not prop_type %}active{% endif %}">All</a>
+            <a href="/properties?type=sale" class="type-btn {% if prop_type=='sale' %}active{% endif %}">For Sale</a>
+            <a href="/properties?type=rent" class="type-btn {% if prop_type=='rent' %}active{% endif %}">For Rent</a>
+            <a href="/properties?type=auction"
+                class="type-btn {% if prop_type=='auction' %}active{% endif %}">Auction</a>
+        </div>
+        <button type="submit" class="btn btn-gold btn-sm"><i class="fas fa-search"></i> Search</button>
+    </form>
+</div>
+
+<div class="props-section">
+    <p class="results-count">Showing <span>{{ properties|length }}</span> propert{{ 'y' if properties|length == 1 else
+        'ies' }}</p>
+    {% if properties %}
+    <div class="grid-3">
+        {% for p in properties %}
+        <div class="card">
+            <div class="card-img">
+                {% if p.image %}
+                <img src="{{ url_for('static', filename='uploads/' + p.image) }}" 
+                     alt="{{ p.title }}"
+                     class="clickable-img"
+                     onclick="openFullImage(this.src)">
+                {% if p.image_count > 1 %}
+                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:white;padding:4px 8px;border-radius:2px;font-size:10px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-camera"></i> {{ p.image_count }}
+                </div>
+                {% endif %}
+                {% else %}
+                <i class="fas fa-building fa-3x"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span class="badge badge-{{ p.type }}">{{ p.type|upper }}</span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        {% if p.locality_score %}
+                        <span class="locality-badge"><i class="fas fa-star"></i> {{ p.locality_score }}/5</span>
+                        {% endif %}
+                        <span style="font-size:11px;color:var(--text-muted);">By {{ p.owner_name }}</span>
+                    </div>
+                </div>
+                <h3 class="card-title">{{ p.title }}</h3>
+                <p class="card-location"><i class="fas fa-map-marker-alt"
+                        style="color:var(--gold);margin-right:6px;"></i>{{ p.location }}</p>
+                <p class="card-price">₹{{ "{:,.0f}".format(p.price) }}{% if p.type == 'rent' %}/mo{% endif %}</p>
+                <div class="card-meta">
+                    {% if p.bedrooms %}<span><i class="fas fa-bed"></i> {{ p.bedrooms }}</span>{% endif %}
+                    {% if p.bathrooms %}<span><i class="fas fa-bath"></i> {{ p.bathrooms }}</span>{% endif %}
+                    {% if p.area %}<span><i class="fas fa-expand-arrows-alt"></i> {{ p.area }} sq.ft</span>{% endif %}
+                </div>
+                <div style="margin-top:16px;display:flex;gap:8px;">
+                    <a href="/property/{{ p.id }}" class="btn btn-outline btn-sm">Details</a>
+                    {% if session.user_id and session.user_role == 'user' %}
+                        {% if p.type == 'auction' %}
+                        <a href="/auctions" class="btn btn-gold btn-sm"><i class="fas fa-gavel"></i> Bid</a>
+                        {% else %}
+                        <a href="/book/{{ p.id }}" class="btn btn-gold btn-sm">Book</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-home"></i>
+        <p style="font-size:18px;color:white;margin-bottom:8px;">No properties found</p>
+        <p>Try adjusting your search filters</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

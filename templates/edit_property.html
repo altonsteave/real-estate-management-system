@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+{% block title %}Edit Property — Elite Estates{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .add-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .add-page .section-title {
+        margin-bottom: 40px;
+    }
+
+    .form-card {
+        background: var(--dark2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 40px;
+    }
+
+    .form-section-title {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 20px;
+        margin-top: 32px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-section-title:first-child {
+        margin-top: 0;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    #map-picker {
+        width: 100%;
+        height: 350px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+        z-index: 1;
+    }
+
+    .map-search-box {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .map-search-box input {
+        flex: 1;
+    }
+
+    .location-coords {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .location-coords span {
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--dark3);
+        padding: 6px 12px;
+        border-radius: 2px;
+        border: 1px solid var(--border);
+    }
+
+    .location-coords span strong {
+        color: var(--gold);
+    }
+
+    .upload-area {
+        border: 2px dashed var(--border);
+        border-radius: 4px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--gold);
+    }
+
+    .upload-area i {
+        font-size: 32px;
+        color: var(--gold);
+        opacity: 0.5;
+        margin-bottom: 12px;
+    }
+
+    .upload-area p {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .current-images {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .current-img-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--dark3);
+    }
+
+    .current-img-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .current-img-item .delete-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(231, 76, 60, 0);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+
+    .current-img-item .delete-overlay.marked {
+        background: rgba(231, 76, 60, 0.7);
+    }
+
+    .current-img-item .delete-overlay label {
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .current-img-item .primary-badge {
+        position: absolute;
+        bottom: 4px;
+        left: 4px;
+        background: var(--gold);
+        color: var(--black);
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 2px;
+        font-weight: 600;
+    }
+
+    .image-previews {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .image-previews .preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--gold);
+        background: var(--dark3);
+    }
+
+    .image-previews .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .new-label {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        background: var(--success);
+        color: white;
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 2px;
+        font-weight: 600;
+    }
+
+    .file-count {
+        font-size: 12px;
+        color: var(--gold);
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="add-page">
+    <div class="section-title">
+        <h2>Edit Property</h2>
+        <p>Update your property details. Changes will be resubmitted for approval.</p>
+        <div class="line"></div>
+    </div>
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" id="property-form">
+            <p class="form-section-title">Property Information</p>
+            <div class="form-group">
+                <label>Property Title</label>
+                <input type="text" name="title" class="form-control" value="{{ prop.title }}" required>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label>Listing Type</label>
+                    <select name="type" class="form-control" id="type-select" required>
+                        <option value="sale" {% if prop.type == 'sale' %}selected{% endif %}>For Sale</option>
+                        <option value="rent" {% if prop.type == 'rent' %}selected{% endif %}>For Rent</option>
+                        <option value="auction" {% if prop.type == 'auction' %}selected{% endif %}>Auction</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹) — <span id="price-label">{% if prop.type == 'rent' %}Monthly Rent{% elif prop.type == 'auction' %}Starting Bid{% else %}Sale Price{% endif %}</span></label>
+                    <input type="number" name="price" class="form-control" value="{{ prop.price|int }}" required>
+                </div>
+            </div>
+
+            <p class="form-section-title">Location — Pick from Map</p>
+            <div class="form-group">
+                <label>Location Name</label>
+                <input type="text" name="location" id="location-name" class="form-control" 
+                    value="{{ prop.location or '' }}" placeholder="Auto-filled from map or type manually" required>
+            </div>
+            <div class="form-group">
+                <div class="map-search-box">
+                    <input type="text" id="map-search" class="form-control" placeholder="Search a place on map...">
+                    <button type="button" class="btn btn-gold btn-sm" onclick="searchPlace()"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="map-picker"></div>
+                <input type="hidden" name="latitude" id="latitude" value="{{ prop.latitude or '' }}">
+                <input type="hidden" name="longitude" id="longitude" value="{{ prop.longitude or '' }}">
+                <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+                    <i class="fas fa-info-circle" style="color:var(--gold);margin-right:4px;"></i>
+                    Click on the map or search to set coordinates. Locality score is calculated within a 2km radius.
+                </p>
+            </div>
+
+            <p class="form-section-title">Property Details</p>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="bedrooms" class="form-control" value="{{ prop.bedrooms }}" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="bathrooms" class="form-control" value="{{ prop.bathrooms }}" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Area (sq.ft)</label>
+                    <input type="number" name="area" class="form-control" value="{{ prop.area }}" step="0.01">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-control">{{ prop.description or '' }}</textarea>
+            </div>
+
+            <div id="auction-field" {% if prop.type != 'auction' %}style="display:none;"{% endif %}>
+                <p class="form-section-title">Auction Settings</p>
+                <div class="form-group">
+                    <label>Auction End Date & Time</label>
+                    <input type="datetime-local" name="auction_end" class="form-control" 
+                           value="{{ prop.auction_end if prop.auction_end else '' }}">
+                </div>
+            </div>
+
+            <p class="form-section-title">Current Photos ({{ prop.images|length }} uploaded)</p>
+            {% if prop.images %}
+            <div class="current-images">
+                {% for img in prop.images %}
+                <div class="current-img-item" id="img-item-{{ img.id }}">
+                    <img src="{{ url_for('static', filename='uploads/' + img['filename']) }}" 
+                         alt="Property Image"
+                         class="clickable-img"
+                         onclick="openFullImage(this.src)">
+                    <div class="delete-overlay" id="overlay-{{ img.id }}">
+                        <label>
+                            <input type="checkbox" name="delete_images" value="{{ img.id }}"
+                                   onchange="toggleDeleteOverlay({{ img.id }}, this.checked)"
+                                   style="display:none;">
+                            <i class="fas fa-trash"></i> Remove
+                        </label>
+                    </div>
+                    {% if img.is_primary %}
+                    <span class="primary-badge">COVER</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <p style="font-size:11px; color:var(--text-muted);"><i class="fas fa-info-circle" style="color:var(--gold);margin-right:4px;"></i>Click "Remove" on an image to mark it for deletion on save.</p>
+            {% else %}
+            <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">No photos uploaded yet.</p>
+            {% endif %}
+
+            <p class="form-section-title">Add New Photos</p>
+            <div class="form-group">
+                <div class="upload-area" onclick="document.getElementById('image-input').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to upload additional photos</p>
+                    <p style="font-size:11px;margin-top:6px;">Total max 4 images per property</p>
+                </div>
+                <input type="file" id="image-input" name="images" accept="image/*" style="display:none;" multiple
+                    onchange="previewNewImages(this)">
+                <p class="file-count" id="file-count"></p>
+                <div class="image-previews" id="image-previews"></div>
+            </div>
+
+            <div style="margin-top:32px;display:flex;gap:12px;">
+                <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Save Changes</button>
+                <a href="/dashboard" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Type selector
+    const typeSelect = document.getElementById('type-select');
+    const auctionField = document.getElementById('auction-field');
+    const priceLabel = document.getElementById('price-label');
+    const labels = { sale: 'Sale Price', rent: 'Monthly Rent', auction: 'Starting Bid' };
+    typeSelect.addEventListener('change', function () {
+        auctionField.style.display = this.value === 'auction' ? 'block' : 'none';
+        priceLabel.textContent = labels[this.value];
+    });
+
+    // Map
+    const initLat = {{ prop.latitude or 20.5937 }};
+    const initLng = {{ prop.longitude or 78.9629 }};
+    const initZoom = {{ 14 if prop.latitude else 5 }};
+    const map = L.map('map-picker').setView([initLat, initLng], initZoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    let marker = null;
+    {% if prop.latitude and prop.longitude %}
+    marker = L.marker([initLat, initLng], { draggable: true }).addTo(map);
+    marker.on('dragend', function (e) {
+        const pos = e.target.getLatLng();
+        document.getElementById('latitude').value = pos.lat.toFixed(6);
+        document.getElementById('longitude').value = pos.lng.toFixed(6);
+        document.getElementById('display-lat').textContent = pos.lat.toFixed(6);
+        document.getElementById('display-lng').textContent = pos.lng.toFixed(6);
+        reverseGeocode(pos.lat, pos.lng);
+    });
+    {% endif %}
+
+    function setMarker(lat, lng, locationName) {
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        document.getElementById('latitude').value = lat.toFixed(6);
+        document.getElementById('longitude').value = lng.toFixed(6);
+        if (locationName) {
+            document.getElementById('location-name').value = locationName;
+        }
+        document.getElementById('display-lat').textContent = lat.toFixed(6);
+        document.getElementById('display-lng').textContent = lng.toFixed(6);
+        document.getElementById('coords-display').style.display = 'flex';
+
+        marker.on('dragend', function (e) {
+            const pos = e.target.getLatLng();
+            document.getElementById('latitude').value = pos.lat.toFixed(6);
+            document.getElementById('longitude').value = pos.lng.toFixed(6);
+            document.getElementById('display-lat').textContent = pos.lat.toFixed(6);
+            document.getElementById('display-lng').textContent = pos.lng.toFixed(6);
+            reverseGeocode(pos.lat, pos.lng);
+        });
+    }
+
+    function reverseGeocode(lat, lng) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(r => r.json())
+            .then(data => {
+                const name = data.display_name || 'Unknown';
+                const short = name.split(',').slice(0, 3).join(',').trim();
+                document.getElementById('location-name').value = short;
+            }).catch(() => { });
+    }
+
+    map.on('click', function (e) {
+        setMarker(e.latlng.lat, e.latlng.lng, '');
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+        map.setView(e.latlng, Math.max(map.getZoom(), 14));
+    });
+
+    function searchPlace() {
+        const q = document.getElementById('map-search').value.trim();
+        if (!q) return;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lng = parseFloat(data[0].lon);
+                    const name = data[0].display_name.split(',').slice(0, 3).join(',').trim();
+                    map.setView([lat, lng], 14);
+                    setMarker(lat, lng, name);
+                } else {
+                    alert('Place not found.');
+                }
+            }).catch(() => alert('Search failed.'));
+    }
+
+    document.getElementById('map-search').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); searchPlace(); }
+    });
+
+    // Toggle delete overlay
+    function toggleDeleteOverlay(imgId, checked) {
+        document.getElementById('overlay-' + imgId).classList.toggle('marked', checked);
+    }
+
+    // New image preview (simple, no DataTransfer)
+    function previewNewImages(input) {
+        const container = document.getElementById('image-previews');
+        const countEl = document.getElementById('file-count');
+        container.innerHTML = '';
+        const files = input.files;
+        const count = files.length;
+        countEl.textContent = count > 0 ? `${count} new image${count > 1 ? 's' : ''} selected` : '';
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(files[i]);
+            div.appendChild(img);
+            const label = document.createElement('span');
+            label.className = 'new-label';
+            label.textContent = 'NEW';
+            div.appendChild(label);
+            container.appendChild(div);
+        }
+    }
+</script>
+{% endblock %}

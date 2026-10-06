@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% block title %}Elite Estates — Luxury Real Estate{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        height: 100vh;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.6) 100%),
+            url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1600') center/cover no-repeat;
+        display: flex;
+        align-items: center;
+        padding: 0 80px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 120px;
+        background: linear-gradient(transparent, var(--black));
+    }
+
+    .hero-content {
+        max-width: 640px;
+        animation: fadeUp 1s ease;
+    }
+
+    .hero-tag {
+        font-size: 11px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .hero-tag::before {
+        content: '';
+        width: 40px;
+        height: 1px;
+        background: var(--gold);
+    }
+
+    .hero-content h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 64px;
+        line-height: 1.1;
+        margin-bottom: 24px;
+        color: white;
+    }
+
+    .hero-content h1 em {
+        color: var(--gold);
+        font-style: italic;
+    }
+
+    .hero-content p {
+        font-size: 15px;
+        line-height: 1.9;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 36px;
+        max-width: 500px;
+    }
+
+    .hero-btns {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .hero-stats {
+        position: absolute;
+        bottom: 80px;
+        right: 80px;
+        display: flex;
+        gap: 40px;
+        z-index: 2;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-num {
+        font-family: 'Playfair Display', serif;
+        font-size: 36px;
+        color: var(--gold);
+    }
+
+    .stat-label {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .features {
+        background: var(--dark);
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: var(--border);
+    }
+
+    .feature-item {
+        background: var(--dark);
+        padding: 40px 32px;
+        transition: background 0.3s;
+    }
+
+    .feature-item:hover {
+        background: var(--dark2);
+    }
+
+    .feature-icon {
+        font-size: 28px;
+        color: var(--gold);
+        margin-bottom: 20px;
+    }
+
+    .feature-item h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .feature-item p {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.8;
+    }
+
+    .section-featured {
+        background: var(--black);
+    }
+
+    .view-all {
+        text-align: center;
+        margin-top: 48px;
+    }
+
+    .cta-band {
+        background: linear-gradient(135deg, var(--dark2), var(--dark3));
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 80px;
+        text-align: center;
+    }
+
+    .cta-band h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 42px;
+        color: var(--gold);
+        margin-bottom: 16px;
+    }
+
+    .cta-band p {
+        color: var(--text-muted);
+        font-size: 15px;
+        max-width: 500px;
+        margin: 0 auto 36px;
+        line-height: 1.9;
+    }
+
+    .cta-btns {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .locality-badge-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid var(--border);
+        color: var(--gold);
+        font-size: 11px;
+        padding: 3px 8px;
+        border-radius: 2px;
+        font-weight: 600;
+    }
+
+    .locality-badge-card i {
+        font-size: 10px;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <p class="hero-tag">Premium Real Estate</p>
+        <h1>Find Your <em>Perfect</em><br>Luxury Estate</h1>
+        <p>Discover exclusive properties, book private appointments, and participate in curated auctions. Secure your
+            dream home with our trusted platform.</p>
+        <div class="hero-btns">
+            <a href="/properties" class="btn btn-gold"><i class="fas fa-search"></i> Browse Properties</a>
+            <a href="/auctions" class="btn btn-outline"><i class="fas fa-gavel"></i> Live Auctions</a>
+        </div>
+    </div>
+    <div class="hero-stats">
+        <div class="stat">
+            <div class="stat-num">200+</div>
+            <div class="stat-label">Properties</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">500+</div>
+            <div class="stat-label">Happy Clients</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">₹500Cr+</div>
+            <div class="stat-label">Deals Closed</div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+    <div class="features-grid">
+        <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-home"></i></div>
+            <h3>Sale Properties</h3>
+            <p>Handpicked luxury homes and estates available for outright purchase.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-key"></i></div>
+            <h3>Premium Rentals</h3>
+            <p>Exclusive residential and commercial spaces for short or long-term lease.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-gavel"></i></div>
+            <h3>Live Auctions</h3>
+            <p>Participate in transparent, real-time property auctions from anywhere.</p>
+        </div>
+        <div class="feature-item">
+            <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+            <h3>Locality Score</h3>
+            <p>Every property rated by nearby amenities — hospitals, schools, transit & more.</p>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED LISTINGS -->
+<section class="section section-featured">
+    <div class="section-title">
+        <h2>Featured Properties</h2>
+        <p>Handpicked luxury listings approved by our team</p>
+        <div class="line"></div>
+    </div>
+
+    {% if featured %}
+    <div class="grid-3">
+        {% for p in featured %}
+        <div class="card">
+            <div class="card-img">
+                {% if p.image %}
+                <img src="{{ url_for('static', filename='uploads/' + p.image) }}" 
+                     alt="{{ p.title }}"
+                     class="clickable-img"
+                     onclick="openFullImage(this.src)">
+                {% if p.image_count > 1 %}
+                <div style="position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.6);color:white;padding:4px 8px;border-radius:2px;font-size:10px;backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-camera"></i> {{ p.image_count }}
+                </div>
+                {% endif %}
+                {% else %}
+                <i class="fas fa-building fa-3x"></i>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span class="badge badge-{{ p.type }}">{{ p.type|upper }}</span>
+                    {% if p.locality_score %}
+                    <span class="locality-badge-card"><i class="fas fa-star"></i> {{ p.locality_score }}/5</span>
+                    {% endif %}
+                </div>
+                <h3 class="card-title">{{ p.title }}</h3>
+                <p class="card-location"><i class="fas fa-map-marker-alt"
+                        style="color:var(--gold);margin-right:6px;"></i>{{ p.location }}</p>
+                <p class="card-price">₹{{ "{:,.0f}".format(p.price) }}{% if p.type == 'rent' %}/mo{% endif %}</p>
+                <div class="card-meta">
+                    {% if p.bedrooms %}<span><i class="fas fa-bed"></i> {{ p.bedrooms }} Beds</span>{% endif %}
+                    {% if p.bathrooms %}<span><i class="fas fa-bath"></i> {{ p.bathrooms }} Baths</span>{% endif %}
+                    {% if p.area %}<span><i class="fas fa-ruler-combined"></i> {{ p.area }} sq.ft</span>{% endif %}
+                </div>
+                <div style="margin-top:16px; display:flex; gap:8px;">
+                    <a href="/property/{{ p.id }}" class="btn btn-outline btn-sm">View Details</a>
+                    {% if session.user_id and session.user_role == 'user' %}
+                        {% if p.type == 'auction' %}
+                        <a href="/auctions" class="btn btn-gold btn-sm"><i class="fas fa-gavel"></i> Bid</a>
+                        {% else %}
+                        <a href="/book/{{ p.id }}" class="btn btn-gold btn-sm">Book</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:var(--text-muted);">
+        <i class="fas fa-home fa-3x" style="color:var(--gold);opacity:0.3;margin-bottom:16px;"></i>
+        <p>No properties available yet. Be the first to list!</p>
+    </div>
+    {% endif %}
+
+    <div class="view-all">
+        <a href="/properties" class="btn btn-gold">View All Properties</a>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band">
+    <h2>List Your Property</h2>
+    <p>Are you a property owner? Join Elite Estates and reach thousands of qualified buyers and renters.</p>
+    <div class="cta-btns">
+        <a href="/register" class="btn btn-gold"><i class="fas fa-user-plus"></i> Register as User</a>
+        <a href="/properties" class="btn btn-outline"><i class="fas fa-search"></i> Explore Properties</a>
+    </div>
+</section>
+{% endblock %}

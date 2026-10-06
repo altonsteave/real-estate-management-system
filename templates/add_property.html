@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% block title %}List a Property — Elite Estates{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .add-page {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 60px 24px;
+    }
+
+    .add-page .section-title {
+        margin-bottom: 40px;
+    }
+
+    .form-card {
+        background: var(--dark2);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 40px;
+    }
+
+    .form-section-title {
+        font-size: 11px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 20px;
+        margin-top: 32px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .form-section-title:first-child {
+        margin-top: 0;
+    }
+
+    .form-row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .form-row-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* Map Picker */
+    #map-picker {
+        width: 100%;
+        height: 350px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        margin-bottom: 12px;
+        z-index: 1;
+    }
+
+    .map-search-box {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .map-search-box input {
+        flex: 1;
+    }
+
+    .location-coords {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+    }
+
+    .location-coords span {
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--dark3);
+        padding: 6px 12px;
+        border-radius: 2px;
+        border: 1px solid var(--border);
+    }
+
+    .location-coords span strong {
+        color: var(--gold);
+    }
+
+    /* Multi-image upload */
+    .upload-area {
+        border: 2px dashed var(--border);
+        border-radius: 4px;
+        padding: 40px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color 0.3s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--gold);
+    }
+
+    .upload-area i {
+        font-size: 32px;
+        color: var(--gold);
+        opacity: 0.5;
+        margin-bottom: 12px;
+    }
+
+    .upload-area p {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .image-previews {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .image-previews .preview-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: var(--dark3);
+    }
+
+    .image-previews .preview-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-previews .preview-item .primary-badge {
+        position: absolute;
+        bottom: 4px;
+        left: 4px;
+        background: var(--gold);
+        color: var(--black);
+        font-size: 9px;
+        padding: 2px 6px;
+        border-radius: 2px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .file-count {
+        font-size: 12px;
+        color: var(--gold);
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="add-page">
+    <div class="section-title">
+        <h2>List Your Property</h2>
+        <p>Submit your property for review. Our team will approve and publish it.</p>
+        <div class="line"></div>
+    </div>
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" id="property-form">
+            <p class="form-section-title">Property Information</p>
+            <div class="form-group">
+                <label>Property Title</label>
+                <input type="text" name="title" class="form-control"
+                    placeholder="e.g. Elegant Sea-View Villa in Kovalam" required>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label>Listing Type</label>
+                    <select name="type" class="form-control" id="type-select" required>
+                        <option value="sale">For Sale</option>
+                        <option value="rent">For Rent</option>
+                        <option value="auction">Auction</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price (₹) — <span id="price-label">Sale Price</span></label>
+                    <input type="number" name="price" class="form-control" placeholder="e.g. 25000000" required>
+                </div>
+            </div>
+
+            <p class="form-section-title">Location — Pick from Map</p>
+            <div class="form-group">
+                <label>Location Name</label>
+                <input type="text" name="location" id="location-name" class="form-control" 
+                    placeholder="e.g. Kovalam, Kerala (auto-filled from map or type manually)" required>
+            </div>
+            <div class="form-group">
+                <div class="map-search-box">
+                    <input type="text" id="map-search" class="form-control" placeholder="Search a place on map... e.g. Kochi, Kerala">
+                    <button type="button" class="btn btn-gold btn-sm" onclick="searchPlace()"><i class="fas fa-search"></i></button>
+                </div>
+                <div id="map-picker"></div>
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <div class="location-coords" id="coords-display" style="display:none;">
+                    <span><strong>Lat:</strong> <span id="display-lat">—</span></span>
+                    <span><strong>Lng:</strong> <span id="display-lng">—</span></span>
+                </div>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+                    <i class="fas fa-info-circle" style="color:var(--gold);margin-right:4px;"></i>
+                    Click on the map or search to set coordinates. This is used to calculate the locality score (nearby facilities within 2km).
+                </p>
+            </div>
+
+            <p class="form-section-title">Property Details</p>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label>Bedrooms</label>
+                    <input type="number" name="bedrooms" class="form-control" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Bathrooms</label>
+                    <input type="number" name="bathrooms" class="form-control" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Area (sq.ft)</label>
+                    <input type="number" name="area" class="form-control" placeholder="0" step="0.01">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-control"
+                    placeholder="Describe the property in detail — features, amenities, surroundings..."></textarea>
+            </div>
+
+            <div id="auction-field" style="display:none;">
+                <p class="form-section-title">Auction Settings</p>
+                <div class="form-group">
+                    <label>Auction End Date & Time</label>
+                    <input type="datetime-local" name="auction_end" class="form-control">
+                </div>
+            </div>
+
+            <p class="form-section-title">Property Photos (up to 4)</p>
+            <div class="form-group">
+                <div class="upload-area" onclick="document.getElementById('image-input').click()">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>Click to select property photos</p>
+                    <p style="font-size:11px;margin-top:6px;">JPG, PNG, WEBP — Select up to 4 images at once</p>
+                </div>
+                <input type="file" id="image-input" name="images" accept="image/*" style="display:none;"
+                    multiple onchange="previewImages(this)">
+                <p class="file-count" id="file-count"></p>
+                <div class="image-previews" id="image-previews"></div>
+            </div>
+
+            <div style="margin-top:32px;display:flex;gap:12px;">
+                <button type="submit" class="btn btn-gold"><i class="fas fa-paper-plane"></i> Submit for
+                    Approval</button>
+                <a href="/dashboard" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Type selector
+    const typeSelect = document.getElementById('type-select');
+    const auctionField = document.getElementById('auction-field');
+    const priceLabel = document.getElementById('price-label');
+    const labels = { sale: 'Sale Price', rent: 'Monthly Rent', auction: 'Starting Bid' };
+    typeSelect.addEventListener('change', function () {
+        auctionField.style.display = this.value === 'auction' ? 'block' : 'none';
+        priceLabel.textContent = labels[this.value];
+    });
+
+    // Map picker
+    const map = L.map('map-picker').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }).addTo(map);
+
+    let marker = null;
+
+    function setMarker(lat, lng, locationName) {
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        document.getElementById('latitude').value = lat.toFixed(6);
+        document.getElementById('longitude').value = lng.toFixed(6);
+        if (locationName) {
+            document.getElementById('location-name').value = locationName;
+        }
+        document.getElementById('display-lat').textContent = lat.toFixed(6);
+        document.getElementById('display-lng').textContent = lng.toFixed(6);
+        document.getElementById('coords-display').style.display = 'flex';
+
+        marker.on('dragend', function (e) {
+            const pos = e.target.getLatLng();
+            document.getElementById('latitude').value = pos.lat.toFixed(6);
+            document.getElementById('longitude').value = pos.lng.toFixed(6);
+            document.getElementById('display-lat').textContent = pos.lat.toFixed(6);
+            document.getElementById('display-lng').textContent = pos.lng.toFixed(6);
+            reverseGeocode(pos.lat, pos.lng);
+        });
+    }
+
+    function reverseGeocode(lat, lng) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(r => r.json())
+            .then(data => {
+                const name = data.display_name || 'Unknown';
+                const short = name.split(',').slice(0, 3).join(',').trim();
+                document.getElementById('location-name').value = short;
+            }).catch(() => { });
+    }
+
+    map.on('click', function (e) {
+        setMarker(e.latlng.lat, e.latlng.lng, '');
+        reverseGeocode(e.latlng.lat, e.latlng.lng);
+        map.setView(e.latlng, Math.max(map.getZoom(), 14));
+    });
+
+    function searchPlace() {
+        const q = document.getElementById('map-search').value.trim();
+        if (!q) return;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lng = parseFloat(data[0].lon);
+                    const name = data[0].display_name.split(',').slice(0, 3).join(',').trim();
+                    map.setView([lat, lng], 14);
+                    setMarker(lat, lng, name);
+                } else {
+                    alert('Place not found. Try a different search term.');
+                }
+            }).catch(() => alert('Search failed. Please try again.'));
+    }
+
+    document.getElementById('map-search').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); searchPlace(); }
+    });
+
+    // Simple multi-image preview (no DataTransfer manipulation — just show previews)
+    function previewImages(input) {
+        const container = document.getElementById('image-previews');
+        const countEl = document.getElementById('file-count');
+        container.innerHTML = '';
+
+        const files = input.files;
+        if (files.length > 4) {
+            alert('Maximum 4 images allowed. Only the first 4 will be uploaded.');
+        }
+
+        const count = Math.min(files.length, 4);
+        countEl.textContent = count > 0 ? `${count} image${count > 1 ? 's' : ''} selected` : '';
+
+        for (let i = 0; i < count; i++) {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(files[i]);
+            div.appendChild(img);
+
+            if (i === 0) {
+                const badge = document.createElement('span');
+                badge.className = 'primary-badge';
+                badge.textContent = 'COVER';
+                div.appendChild(badge);
+            }
+            container.appendChild(div);
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Register — Elite Estates{% endblock %}
+{% block extra_css %}
+<style>
+    .auth-page {
+        min-height: calc(100vh - 72px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 24px;
+        background: radial-gradient(ellipse at top, rgba(212, 175, 55, 0.05) 0%, transparent 60%);
+    }
+
+    .auth-box {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .auth-logo h1 {
+        font-family: 'Playfair Display', serif;
+        color: var(--gold);
+        font-size: 32px;
+        letter-spacing: 3px;
+    }
+
+    .auth-logo p {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .auth-card {
+        background: var(--dark2);
+        border: 1px solid var(--border);
+        padding: 40px;
+        border-radius: 4px;
+    }
+
+    .auth-card h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+
+    .auth-card .sub {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-bottom: 32px;
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 24px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .auth-footer a {
+        color: var(--gold);
+        text-decoration: none;
+    }
+
+    .role-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .role-option input {
+        display: none;
+    }
+
+    .role-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+
+    .role-option label i {
+        font-size: 24px;
+    }
+
+    .role-option input:checked+label {
+        border-color: var(--gold);
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.08);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+    <div class="auth-box">
+        <div class="auth-logo">
+            <h1>⬡ Elite Estates</h1>
+            <p>Join our exclusive community</p>
+        </div>
+        <div class="auth-card">
+            <h2>Create Account</h2>
+            <p class="sub">Start your luxury real estate journey</p>
+            <form method="POST">
+                <div class="form-group">
+                    <label>I am a</label>
+                    <div class="role-toggle">
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role-user" value="user" checked>
+                            <label for="role-user"><i class="fas fa-user"></i> Property Buyer / Renter</label>
+                        </div>
+                        <div class="role-option">
+                            <input type="radio" name="role" id="role-admin" value="admin">
+                            <label for="role-admin"><i class="fas fa-user-shield"></i> Admin / Manager</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="you@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="+91 99999 99999">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" class="form-control" placeholder="Minimum 8 characters"
+                        required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;">
+                    <i class="fas fa-user-plus"></i> Create My Account
+                </button>
+            </form>
+        </div>
+        <div class="auth-footer">
+            Already have an account? <a href="/login">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
